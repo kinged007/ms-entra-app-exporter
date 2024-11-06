@@ -4,7 +4,7 @@ console = Console()
 import inquirer, json
 from schema.migration_db.tenant import Tenant
 import os
-from utils.msapp import get_access_token
+from utils.msapp import get_access_token, get_user_access_token
 import glob
 
 def create_new_tenant()->None:
@@ -12,7 +12,10 @@ def create_new_tenant()->None:
     questions = [
         inquirer.Text('authority', message="Authority URL", default="https://login.microsoftonline.com/"),
         inquirer.Text('client_id', message="Client ID"),
-        inquirer.Text('secret', message="Client Secret"),
+        inquirer.List('connection', message="Connection Type", choices=["app", "user"], default="app"),
+        inquirer.Text('private_key', message="Private Key (if using certificate)"),
+        inquirer.Text('thumbprint', message="Thumbprint (if using certificate)"),
+        inquirer.Text('secret', message="Client Secret (if not using certificate)"),
         inquirer.Text('endpoint', message="Graph API Endpoint (exclude API version!)", default="https://graph.microsoft.com"),
         inquirer.Text('scope', message="Scope (comma separated)", default="https://graph.microsoft.com/.default"),
     ]
@@ -55,7 +58,10 @@ def get_source_tenant_method():
         console.print("Tenant data is valid", style="bold green")
         console.print("Getting access token", style="bold green")
 
-        access_token = get_access_token(dict(tenant.model_dump()))
+        if tenant.connection == "app":
+            access_token = get_access_token(dict(tenant.model_dump()))
+        else:
+            access_token = get_user_access_token(dict(tenant.model_dump()))
 
         if not access_token:
             console.print("Failed to get access token", style="bold red")
