@@ -3,6 +3,7 @@ from loguru import logger as log
 import msal
 import requests
 from .requests import server_request
+import getpass
 from rich.progress import track
 import time
 
@@ -27,11 +28,12 @@ def get_access_token(config: dict):
     if "secret" in config and config["secret"]:
         client_credential = config["secret"]
     elif "private_key" in config and "thumbprint" in config and config["private_key"]:
-        # Load private key for certificate-based authentication
+        # Prompt for passphrase if using certificate-based authentication
+        passphrase = getpass.getpass("Enter passphrase for the private key: ")
         client_credential = {
             "private_key": open(config["private_key"]).read(),
             "thumbprint": str(config["thumbprint"]).replace(":", "").lower(),
-            "passphrase": config.get("passphrase", None),
+            "passphrase": passphrase,
 
         }
     else:
