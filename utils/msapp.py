@@ -22,36 +22,48 @@ def tenant_request(endpoint, method="GET", data=None, headers=None, params=None,
     # raise Exception(f"Failed to get data from tenant: {req.status_code} {req.text}")
     return None
 
-def get_access_token(config:dict):
-    if "secret" in config:
+def get_access_token(config: dict):
+    # Determine the client credentials to use
+    if "secret" in config and config["secret"]:
         client_credential = config["secret"]
-    elif "certificate" in config and "thumbprint" in config:
+    elif "private_key" in config and "thumbprint" in config and config["private_key"]:
+        # Load private key for certificate-based authentication
         client_credential = {
-            "private_key": open(config["certificate"]).read(),
-            "thumbprint": config["thumbprint"]
+            "private_key": open(config["private_key"]).read(),
+            "thumbprint": str(config["thumbprint"]).replace(":", "").lower(),
+            "passphrase": config.get("passphrase", None),
+
         }
     else:
-        raise ValueError("Either 'secret' or 'certificate' and 'thumbprint' must be provided in the config.")
+        raise ValueError("Either 'secret' or 'private_key' and 'thumbprint' must be provided in the config.")
 
+    print(client_credential)
+    
+    
+    # Initialize the MSAL Confidential Client Application
     source_app = msal.ConfidentialClientApplication(
         config["client_id"],
         authority=config.get("authority"),
         client_credential=client_credential,
     )
-    # The pattern to acquire a token looks like this.
-    result = None
-    # Firstly, looks up a token from cache
-    # Since we are looking for token for the current app, NOT for an end user,
-    # notice we give account parameter as None.
+    
+    print("Acquiring token...")
+
+    # Try to acquire a token silently first (cached tokens)
     result = source_app.acquire_token_silent(config["scope"], account=None)
 
+    # If no cached token, request a new one
     if not result:
         result = source_app.acquire_token_for_client(scopes=config["scope"])
 
+    # Check if we successfully acquired an access token
     if "access_token" in result:
         return result['access_token']
+    else:
+        # If we failed, print error details for troubleshooting
+        print("Failed to acquire token:", result.get("error"), result.get("error_description"))
+        return None
 
-    return None
 
 
 def count_apps( params: dict = {}, baseurl: str = "https://graph.microsoft.com", access_token: str = None):
