@@ -38,12 +38,14 @@ fi
 
 cd "$(dirname "$0")" || exit
 
-# Set proxy for pip
-export PIP_PROXY="--proxy $PROXY_ADDRESS"
-
-# Set proxy for Python app
-export HTTP_PROXY=$PROXY_ADDRESS
-export HTTPS_PROXY=$PROXY_ADDRESS
+# Set proxy for pip if PROXY_ADDRESS is not empty
+if [ -n "$PROXY_ADDRESS" ]; then
+    export PIP_PROXY="--proxy $PROXY_ADDRESS"
+    export HTTP_PROXY=$PROXY_ADDRESS
+    export HTTPS_PROXY=$PROXY_ADDRESS
+else
+    export PIP_PROXY=""
+fi
 
 if [ ! -d "venv" ];
 then
