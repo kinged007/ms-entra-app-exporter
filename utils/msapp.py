@@ -29,7 +29,7 @@ def get_access_token(config: dict):
         client_credential = config["secret"]
     elif "private_key" in config and "thumbprint" in config and config["private_key"]:
         # Prompt for passphrase if using certificate-based authentication
-        passphrase = getpass.getpass("Enter passphrase for the private key: ")
+        passphrase = getpass.getpass("Enter passphrase for the private key: ") or None
         client_credential = {
             "private_key": open(config["private_key"]).read(),
             "thumbprint": str(config["thumbprint"]).replace(":", "").lower(),
