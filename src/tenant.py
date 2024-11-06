@@ -5,6 +5,7 @@ import inquirer, json
 from schema.migration_db.tenant import Tenant
 import os
 from utils.msapp import get_access_token
+import glob
 
 def create_new_tenant()->None:
     
@@ -112,3 +113,19 @@ def get_destination_tenants_method():
             return get_destination_tenants_method()
 
     return final_selection
+
+def delete_all_tenants():
+    """Delete all tenant JSON files in the tenants/ directory."""
+    try:
+        tenant_files = glob.glob("tenants/*.json")
+        if not tenant_files:
+            console.print("No tenant files found to delete.", style="bold yellow")
+            return
+
+        for tenant_file in tenant_files:
+            os.remove(tenant_file)
+            console.print(f"Deleted {tenant_file}", style="bold green")
+
+        console.print("All tenant files deleted successfully.", style="bold green")
+    except Exception as e:
+        console.print(f"Failed to delete tenant files: {e}", style="bold red")
