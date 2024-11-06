@@ -23,15 +23,21 @@ def tenant_request(endpoint, method="GET", data=None, headers=None, params=None,
     return None
 
 def get_access_token(config:dict):
+    if "secret" in config:
+        client_credential = config["secret"]
+    elif "certificate" in config and "thumbprint" in config:
+        client_credential = {
+            "private_key": open(config["certificate"]).read(),
+            "thumbprint": config["thumbprint"]
+        }
+    else:
+        raise ValueError("Either 'secret' or 'certificate' and 'thumbprint' must be provided in the config.")
+
     source_app = msal.ConfidentialClientApplication(
         config["client_id"],
-        authority=config.get("authority"),  # For Entra ID or External ID,
-        # oidc_authority=config.get("oidc_authority"),  # For External ID with custom domain
-        client_credential=config["secret"],
-        # token_cache=...  # Default cache is in memory only.
-                        # You can learn how to use SerializableTokenCache from
-                        # https://msal-python.rtfd.io/en/latest/#msal.SerializableTokenCache
-        )
+        authority=config.get("authority"),
+        client_credential=client_credential,
+    )
     # The pattern to acquire a token looks like this.
     result = None
     # Firstly, looks up a token from cache
