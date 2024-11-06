@@ -17,16 +17,17 @@ def create_new_tenant()->None:
         inquirer.Text('scope', message="Scope (comma separated)", default="https://graph.microsoft.com/.default"),
     ]
 
-    answers = inquirer.prompt(base_questions)
+    try:
+        answers = inquirer.prompt(base_questions)
 
-    if answers['connection'] == 'app':
-        app_questions = [
-            inquirer.Text('private_key', message="Private Key (if using certificate)"),
-            inquirer.Text('thumbprint', message="Thumbprint (if using certificate)"),
-            inquirer.Text('secret', message="Client Secret (if not using certificate)"),
-        ]
-        app_answers = inquirer.prompt(app_questions)
-        answers.update(app_answers)
+        if answers['connection'] == 'app':
+            app_questions = [
+                inquirer.Text('private_key', message="Private Key (if using certificate)"),
+                inquirer.Text('thumbprint', message="Thumbprint (if using certificate)"),
+                inquirer.Text('secret', message="Client Secret (if not using certificate)"),
+            ]
+            app_answers = inquirer.prompt(app_questions)
+            answers.update(app_answers)
         # print(answers)
         answers['scope'] = answers['scope'].split(",")
         tenant = Tenant(**answers)
