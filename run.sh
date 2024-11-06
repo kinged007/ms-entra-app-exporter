@@ -31,8 +31,10 @@ else
     exit 1
 fi
 
-# Load configuration
-source "$(dirname "$0")/config.sh"
+# Load configuration from .env file
+if [ -f "$(dirname "$0")/.env" ]; then
+    export $(grep -v '^#' "$(dirname "$0")/.env" | xargs)
+fi
 
 cd "$(dirname "$0")" || exit
 
