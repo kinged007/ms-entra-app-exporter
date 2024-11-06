@@ -117,6 +117,11 @@ def get_destination_tenants_method():
 def delete_all_tenants():
     """Delete all tenant JSON files in the tenants/ directory."""
     try:
+        confirm = inquirer.confirm("Are you sure you want to delete all tenant files?", default=False)
+        if not confirm:
+            console.print("Deletion cancelled.", style="bold yellow")
+            return
+
         tenant_files = glob.glob("tenants/*.json")
         if not tenant_files:
             console.print("No tenant files found to delete.", style="bold yellow")
