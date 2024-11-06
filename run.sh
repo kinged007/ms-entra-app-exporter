@@ -31,7 +31,17 @@ else
     exit 1
 fi
 
+# Load configuration
+source "$(dirname "$0")/config.sh"
+
 cd "$(dirname "$0")" || exit
+
+# Set proxy for pip
+export PIP_PROXY="--proxy $PROXY_ADDRESS"
+
+# Set proxy for Python app
+export HTTP_PROXY=$PROXY_ADDRESS
+export HTTPS_PROXY=$PROXY_ADDRESS
 
 if [ ! -d "venv" ];
 then
@@ -41,7 +51,7 @@ then
     . venv/bin/activate
 
     echo Installing dependencies
-    $PIP install -r requirements.txt --upgrade
+    $PIP install $PIP_PROXY -r requirements.txt --upgrade
     # $PIP install -r vendor/gpt-researcher/requirements.txt --upgrade
     
 else
@@ -56,7 +66,7 @@ else
         REQUIREMENTS_FILES=$(find modules -type f -name 'requirements.txt')
         for FILE in $REQUIREMENTS_FILES; do
             echo "Installing requirements from $FILE"
-            $PIP install --upgrade -r $FILE
+            $PIP install $PIP_PROXY --upgrade -r $FILE
         done
         # $PIP install --upgrade -r vendor/gpt-researcher/requirements.txt
         echo "Upgraded dependencies. Please restart the application."
