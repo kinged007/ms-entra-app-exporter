@@ -3,18 +3,13 @@ setlocal
 
 echo.
 
-:: Check if python3 or python is available
-where python3 >nul 2>&1
+:: Check if python is available
+where python >nul 2>&1
 if %errorlevel% equ 0 (
-    set "PYTHON=python3"
+    set "PYTHON=python"
 ) else (
-    where python >nul 2>&1
-    if %errorlevel% equ 0 (
-        set "PYTHON=python"
-    ) else (
-        echo Could not find python or python3. Please make sure they are installed.
-        exit /b 1
-    )
+    echo Could not find python. Please make sure it is installed.
+    exit /b 1
 )
 
 :: Check if pip3 or pip is available
