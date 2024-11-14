@@ -26,6 +26,10 @@ run.bat
 
 If a proxy is required, specify it in the `.env` file.
 
+```
+PROXY_ADDRESS="http://your-proxy-address:port"
+```
+
 ## Installation
 
 1. Clone the repository.
