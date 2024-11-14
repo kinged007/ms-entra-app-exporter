@@ -2,12 +2,6 @@
 
 echo
 
-# if ! command -v python3 &> /dev/null;
-# then
-#     echo Python3 is not installed
-#     exit 1
-# fi
-
 # Check if python3 is available
 if command -v python3 &>/dev/null; then
     PYTHON=python3
@@ -56,7 +50,6 @@ then
 
     echo Installing dependencies
     $PIP install $PIP_PROXY -r requirements.txt --upgrade
-    # $PIP install -r vendor/gpt-researcher/requirements.txt --upgrade
     
 else
 
@@ -66,13 +59,7 @@ else
     # Check if "--upgrade" is passed in the arguments
     if [[ "${@}" =~ "--upgrade" ]]; then
         echo "Upgrading dependencies..."
-        $PIP install --upgrade -r requirements.txt
-        REQUIREMENTS_FILES=$(find modules -type f -name 'requirements.txt')
-        for FILE in $REQUIREMENTS_FILES; do
-            echo "Installing requirements from $FILE"
-            $PIP install $PIP_PROXY --upgrade -r $FILE
-        done
-        # $PIP install --upgrade -r vendor/gpt-researcher/requirements.txt
+        $PIP install $PIP_PROXY --upgrade -r requirements.txt
         echo "Upgraded dependencies. Please restart the application."
         exit 0
     fi

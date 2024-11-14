@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from rich.console import Console
 console = Console()
 import inquirer, json
-from schema.migration_db.tenant import Tenant
+from schema.tenant import Tenant
 import os
 from utils.msapp import get_access_token, get_user_access_token
 import glob
@@ -22,9 +22,9 @@ def create_new_tenant()->None:
 
         if answers['connection'] == 'app':
             app_questions = [
-                inquirer.Text('private_key', message="Private Key (if using certificate)"),
+                inquirer.Text('private_key', message="Private Key (if using certificate) - File path OR encryption key"),
                 inquirer.Text('thumbprint', message="Thumbprint (if using certificate)"),
-                inquirer.Text('secret', message="Client Secret (if not using certificate)"),
+                inquirer.Text('secret', message="Client Secret (if NOT using certificate)"),
             ]
             app_answers = inquirer.prompt(app_questions)
             answers.update(app_answers)
@@ -38,7 +38,7 @@ def create_new_tenant()->None:
     except Exception as e:
         console.print(f"Failed to create tenant: {e}", style="bold red")
 
-def get_source_tenant_method():
+def get_source_tenant_method() -> Tenant:
 
     try:
         console.print("Select SOURCE Tenant to migrate from", style="bold magenta")
@@ -127,23 +127,29 @@ def get_destination_tenants_method():
 
     return final_selection
 
-def delete_all_tenants():
+def clean_up_data():
     """Delete all tenant JSON files in the tenants/ directory."""
     try:
-        confirm = inquirer.confirm("Are you sure you want to delete all tenant files?", default=False)
+        confirm = inquirer.confirm("Are you sure you want to delete all tenant files and exported data?", default=False)
         if not confirm:
             console.print("Deletion cancelled.", style="bold yellow")
             return
 
         tenant_files = glob.glob("tenants/*.json")
+        exported_files = glob.glob("files/*.json")
+        
         if not tenant_files:
             console.print("No tenant files found to delete.", style="bold yellow")
-            return
+        if not exported_files:
+            console.print("No exported files found to delete.", style="bold yellow")
+        
+        all_files = tenant_files + exported_files
 
-        for tenant_file in tenant_files:
-            os.remove(tenant_file)
-            console.print(f"Deleted {tenant_file}", style="bold green")
+        for f in all_files:
+            os.remove(f)
+            console.print(f"Deleted {f}", style="bold green")
 
-        console.print("All tenant files deleted successfully.", style="bold green")
+        console.print("Done cleaning up.", style="bold green")
+        
     except Exception as e:
-        console.print(f"Failed to delete tenant files: {e}", style="bold red")
+        console.print(f"Failed to delete files: {e}", style="bold red")

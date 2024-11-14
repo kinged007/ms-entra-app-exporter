@@ -1,0 +1,11 @@
+# Python 3.8
+numpy
+pandas
+pydantic
+requests
+
+loguru
+rich
+inquirer
+
+msal # Microsoft Authentication Library
