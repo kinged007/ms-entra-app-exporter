@@ -48,6 +48,7 @@ if not "%PROXY_ADDRESS%"=="" (
     set "PIP_PROXY="
 )
 
+
 :: Check if virtual environment directory exists
 if not exist "venv" (
     echo Creating virtual environment
@@ -62,8 +63,14 @@ if not exist "venv" (
     call venv\Scripts\activate
 
     :: Check if "--upgrade" is passed in the arguments
-    echo %* | findstr /i "--upgrade" >nul
-    if not errorlevel 1 (
+    set "UPGRADE=false"
+    for %%i in (%*) do (
+        if "%%i"=="--upgrade" (
+            set "UPGRADE=true"
+        )
+    )
+
+    if "%UPGRADE%"=="true" (
         echo Upgrading dependencies...
         %PIP% install %PIP_PROXY% --upgrade -r requirements.txt
         echo Upgraded dependencies. Please restart the application.

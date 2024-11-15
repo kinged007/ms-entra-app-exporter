@@ -47,15 +47,6 @@ follow_up_endpoints = {
     # ],
 }
 
-# def user_choice():
-#     questions = [
-#         inquirer.List('options',
-#                     message="What do you want to do?",
-#                     choices=['Search', 'Change App Type', 'Change Tenant', 'Exit'],
-#                 ),
-#     ]
-#     answers = inquirer.prompt(questions)
-#     return answers['options']
 
 def list_items(endpoint: str , params: dict = {}, access_token: str = None, max_results: int = 999, total_results:int = None):
     
@@ -123,7 +114,7 @@ def fetch_listing(option:str, endpoint:str, tenant:Tenant):
     
     last_skip_publishers = []
     
-    table_columns = ['id', 'displayName', 'createdDateTime', 'appId']
+    table_columns = ['displayName', 'appId']
     
     while True:
         # apps = None
@@ -245,7 +236,7 @@ def fetch_listing(option:str, endpoint:str, tenant:Tenant):
                     'Change Search Criteria', 
                     "Change Table Columns to Display", 
                     "Save Query", 
-                    'Return Selection (ie. to create migration job)',
+                    # 'Return Selection (ie. to create migration job)',
                     'Abort'
                 ])
             ], theme=inquirier_theme)
@@ -399,11 +390,6 @@ def run_explorer():
             apps_type = answers['options']
             
             while True:
-                # if apps_type == 'servicePrincipals':
-                #     apps = fetch_listing(apps_type, endpoint="/servicePrincipals", tenant=source_tenant)
-                    
-                # if apps_type == 'applications':
-                #     apps = fetch_listing(apps_type, endpoint="/applications", tenant=source_tenant)
                     
                 if apps_type == 'connectorGroup':
                     apps = fetch_listing(apps_type, endpoint="/onPremisesPublishingProfiles/applicationProxy/connectorGroups", tenant=source_tenant)
