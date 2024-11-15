@@ -201,6 +201,8 @@ def manage_tenants():
     elif action == "Delete Tenant":
         delete_tenant()
         
+
+def clean_up_data():
     """Delete all tenant JSON files in the tenants/ directory."""
     try:
         confirm = inquirer.confirm("Are you sure you want to delete all tenant files and exported data?", default=False)
