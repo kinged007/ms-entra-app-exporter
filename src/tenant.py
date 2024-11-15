@@ -7,14 +7,14 @@ import os
 from utils.msapp import get_access_token, get_user_access_token
 import glob
 
-def create_new_tenant()->None:
-    
+def create_or_edit_tenant(tenant_data=None) -> None:
+    """Create a new tenant or edit an existing one."""
     base_questions = [
-        inquirer.Text('authority', message="Authority URL", default="https://login.microsoftonline.com/"),
-        inquirer.Text('client_id', message="Client ID"),
-        inquirer.List('connection', message="Connection Type", choices=["app", "user"], default="app"),
-        inquirer.Text('endpoint', message="Graph API Endpoint (exclude API version!)", default="https://graph.microsoft.com"),
-        inquirer.Text('scope', message="Scope (comma separated)", default="https://graph.microsoft.com/.default"),
+        inquirer.Text('authority', message="Authority URL", default=tenant_data.get('authority', "https://login.microsoftonline.com/") if tenant_data else "https://login.microsoftonline.com/"),
+        inquirer.Text('client_id', message="Client ID", default=tenant_data.get('client_id', "") if tenant_data else ""),
+        inquirer.List('connection', message="Connection Type", choices=["app", "user"], default=tenant_data.get('connection', "app") if tenant_data else "app"),
+        inquirer.Text('endpoint', message="Graph API Endpoint (exclude API version!)", default=tenant_data.get('endpoint', "https://graph.microsoft.com") if tenant_data else "https://graph.microsoft.com"),
+        inquirer.Text('scope', message="Scope (comma separated)", default=",".join(tenant_data.get('scope', ["https://graph.microsoft.com/.default"])) if tenant_data else "https://graph.microsoft.com/.default"),
     ]
 
     try:
@@ -22,21 +22,27 @@ def create_new_tenant()->None:
 
         if answers['connection'] == 'app':
             app_questions = [
-                inquirer.Text('private_key', message="Private Key (if using certificate) - File path OR encryption key"),
-                inquirer.Text('thumbprint', message="Thumbprint (if using certificate)"),
-                inquirer.Text('secret', message="Client Secret (if NOT using certificate)"),
+                inquirer.Text('private_key', message="Private Key (if using certificate) - File path OR encryption key", default=tenant_data.get('private_key', "") if tenant_data else ""),
+                inquirer.Text('thumbprint', message="Thumbprint (if using certificate)", default=tenant_data.get('thumbprint', "") if tenant_data else ""),
+                inquirer.Text('secret', message="Client Secret (if NOT using certificate)", default=tenant_data.get('secret', "") if tenant_data else ""),
             ]
             app_answers = inquirer.prompt(app_questions)
             answers.update(app_answers)
-        # print(answers)
+
         answers['scope'] = answers['scope'].split(",")
         tenant = Tenant(**answers)
-        name = input("Enter a name for this tenant: ")
+
+        if tenant_data:
+            name = tenant_data['name']
+            console.print(f"Editing tenant '{name}'", style="bold green")
+        else:
+            name = input("Enter a name for this tenant: ")
+
         with open(f"tenants/{name}.json", "w") as f:
             f.write(json.dumps(tenant.model_dump(), indent=4))
-            console.print(f"Tenant '{name}' created successfully", style="bold green")
+            console.print(f"Tenant '{name}' {'edited' if tenant_data else 'created'} successfully", style="bold green")
     except Exception as e:
-        console.print(f"Failed to create tenant: {e}", style="bold red")
+        console.print(f"Failed to {'edit' if tenant_data else 'create'} tenant: {e}", style="bold red")
 
 def get_source_tenant_method() -> Tenant:
 
@@ -149,8 +155,9 @@ def view_edit_tenant():
             console.print(json.dumps(tenant_data, indent=4), style="bold blue")
 
         if inquirer.confirm("Do you want to edit this tenant?", default=False):
-            # Implement editing logic here
-            console.print("Editing functionality is not yet implemented.", style="bold yellow")
+            # Use the create_or_edit_tenant function to edit the tenant
+            tenant_data['name'] = selection.split('.')[0]  # Extract name from filename
+            create_or_edit_tenant(tenant_data)
     except Exception as e:
         console.print(f"Failed to view/edit tenant: {e}", style="bold red")
 
