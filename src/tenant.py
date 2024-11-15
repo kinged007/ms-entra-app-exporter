@@ -202,7 +202,7 @@ def manage_tenants():
     action = answers['action']
 
     if action == "Create New Tenant":
-        create_new_tenant()
+        create_or_edit_tenant()
     elif action == "View/Edit Tenant":
         view_edit_tenant()
     elif action == "Delete Tenant":
