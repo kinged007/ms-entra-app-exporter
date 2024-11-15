@@ -127,7 +127,80 @@ def get_destination_tenants_method():
 
     return final_selection
 
-def clean_up_data():
+def view_edit_tenant():
+    """View or edit an existing tenant."""
+    try:
+        tenants = os.listdir("tenants")
+        if not tenants:
+            console.print("No tenants available to view or edit.", style="bold yellow")
+            return
+
+        questions = [
+            inquirer.List('options',
+                        message="Select a tenant to view/edit:",
+                        choices=tenants,
+                    ),
+        ]
+        answers = inquirer.prompt(questions)
+        selection = answers['options']
+
+        with open(f"tenants/{selection}", "r") as f:
+            tenant_data = json.load(f)
+            console.print(json.dumps(tenant_data, indent=4), style="bold blue")
+
+        if inquirer.confirm("Do you want to edit this tenant?", default=False):
+            # Implement editing logic here
+            console.print("Editing functionality is not yet implemented.", style="bold yellow")
+    except Exception as e:
+        console.print(f"Failed to view/edit tenant: {e}", style="bold red")
+
+def delete_tenant():
+    """Delete a tenant."""
+    try:
+        tenants = os.listdir("tenants")
+        if not tenants:
+            console.print("No tenants available to delete.", style="bold yellow")
+            return
+
+        questions = [
+            inquirer.List('options',
+                        message="Select a tenant to delete:",
+                        choices=tenants,
+                    ),
+        ]
+        answers = inquirer.prompt(questions)
+        selection = answers['options']
+
+        if inquirer.confirm(f"Are you sure you want to delete {selection}?", default=False):
+            os.remove(f"tenants/{selection}")
+            console.print(f"Tenant '{selection}' deleted successfully.", style="bold green")
+    except Exception as e:
+        console.print(f"Failed to delete tenant: {e}", style="bold red")
+
+def manage_tenants():
+    """Manage tenants by creating, viewing/editing, or deleting them."""
+    options = [
+        "Create New Tenant",
+        "View/Edit Tenant",
+        "Delete Tenant"
+    ]
+
+    questions = [
+        inquirer.List('action',
+                    message="What would you like to do?",
+                    choices=options,
+                ),
+    ]
+    answers = inquirer.prompt(questions)
+    action = answers['action']
+
+    if action == "Create New Tenant":
+        create_new_tenant()
+    elif action == "View/Edit Tenant":
+        view_edit_tenant()
+    elif action == "Delete Tenant":
+        delete_tenant()
+        
     """Delete all tenant JSON files in the tenants/ directory."""
     try:
         confirm = inquirer.confirm("Are you sure you want to delete all tenant files and exported data?", default=False)
