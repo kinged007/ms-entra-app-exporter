@@ -1,8 +1,5 @@
-from rich import print
 from rich.console import Console
 console = Console()
-
-import time
 
 from schema.application import ApplicationModel
 from schema.servicePrincipal import ServicePrincipalModel

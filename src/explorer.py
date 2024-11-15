@@ -1,7 +1,5 @@
-from pydantic import BaseModel
-from typing import Optional
 from rich.console import Console
-from rich.progress import Progress, track
+from rich.progress import track
 
 console = Console()
 import inquirer, json

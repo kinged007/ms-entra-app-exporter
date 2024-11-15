@@ -7,7 +7,7 @@ import json
 
 from utils.validate import sanitize_app_data
 from src.apps import  find_select_apps, batch_fetch_sp_by_appid
-from src.tenant import get_source_tenant_method, create_new_tenant, clean_up_data
+from src.tenant import get_source_tenant_method, manage_tenants, clean_up_data
 from src.explorer import run_explorer   
 from utils.time import nice_time
 
@@ -22,17 +22,8 @@ if "--proxy" in sys.argv:
     os.environ['http_proxy'] = proxy
     os.environ['https_proxy'] = proxy
 
-if not os.path.exists("tenants"):
-    os.makedirs("tenants", exist_ok=True)
-    # Create a sample tenant
-    # with open("tenants/sample_tenant.json", "w") as f:
-    #     json.dump({
-    #         "authority": "https://login.microsoftonline.com/tenant-id",
-    #         "client_id": "app-client-id",
-    #         "scope": [ "https://graph.microsoft.com/.default" ],
-    #         "secret": "client-secret",
-    #         "endpoint": "https://graph.microsoft.com"
-    #     }, f, indent=4)
+# Use the option below to create a sample tenant file
+os.makedirs("tenants", exist_ok=True)
 os.makedirs("queries", exist_ok=True)
 os.makedirs("files", exist_ok=True)
 
@@ -49,7 +40,7 @@ while True:
             inquirer.List('options',
                         message="What do you want to do?",
                         choices=[
-                            "🏠 Create a New Tenant", 
+                            "🏠 Manage Tenants", 
                             "🔍 Activate API Explorer", 
                             "📦 Export App Metadata", 
                             # "📋 View App Schemas", 
@@ -65,19 +56,10 @@ while True:
         match selection:
             case "🚪 Exit":
                 break
-            case "🏠 Create a New Tenant":
-                create_new_tenant()
+            case "🏠 Manage Tenants":
+                manage_tenants()
             case "📦 Export App Metadata":
                 source_tenant = get_source_tenant_method()
-                # Ask how to select apps: by search/filter or by manual selection, OR by CSV 
-                # questions = [
-                #     inquirer.List('options',
-                #                 message="Select type of app you will be exporting?",
-                #                 choices=['Application', 'Service Principal'],
-                #                 ),
-                # ]
-                # answers = inquirer.prompt(questions)
-                # app_type = answers['options']
                 app_type = inquirer.list_input("Select type of app you will be exporting?", choices=['Application', 'Service Principal'])
                 fetch_sp = False
 
@@ -111,7 +93,7 @@ while True:
                 
                 for app in santized_apps:
                     print(app)
-                    if input("Press Enter to continue, or 'q' to quit: ") == 'q':
+                    if input("Press Enter to continue, or 'q' to quit review: ") == 'q':
                         break
                     
                 
@@ -120,7 +102,7 @@ while True:
                     time.sleep(3)
                     for sp in sanitized_sps:
                         print(sp)
-                        if input("Press Enter to continue, or 'q' to quit: ") == 'q':
+                        if input("Press Enter to continue, or 'q' to quit review: ") == 'q':
                             break
                 
                 console.print("Saving data to file", style="bold green")
