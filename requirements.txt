@@ -1,5 +1,4 @@
 # Python 3.8
-numpy
 pandas
 pydantic
 requests

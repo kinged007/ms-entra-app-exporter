@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from rich.console import Console
 console = Console()
 import inquirer, json

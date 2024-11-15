@@ -2,7 +2,6 @@ from loguru import logger as log
 
 import msal
 from os import path
-import requests
 from .requests import server_request
 import getpass
 from rich.progress import track
