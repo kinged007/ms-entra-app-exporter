@@ -8,6 +8,20 @@ This application is designed to securely and compliantly export applications and
 - **Export Options**: Export app data using search and filter or from a CSV file.
 - **Data Sanitization**: Ensures sensitive information is not leaked.
 
+## Setup
+
+Create an App Registration (oAuth) app in Microsoft Entra. 
+
+Under Authentication, click "Add a Platform".
+Select "Mobile and desktop Applications"
+Select the option for "MSAL only".
+Click "Configure"
+
+This will allow access via User Authentication.
+
+To allow access via Certificate or Secret Key, you can configure this in the "Certificates and Secrets" section.
+
+
 ## Usage
 
 To run the application, execute the following command:
