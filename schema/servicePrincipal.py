@@ -7,7 +7,7 @@ class addIn(BaseModel):
     https://learn.microsoft.com/en-us/graph/api/resources/addin?view=graph-rest-1.0
     """
     id: Optional[str] = None
-    properties: Optional[Dict[str, Any]] = None
+    properties: Optional[List[Dict[str, Any]]] = None
     type: Optional[str] = None
     
 class appRoleResource(BaseModel):
