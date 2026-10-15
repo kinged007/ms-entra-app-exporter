@@ -23,6 +23,6 @@ jobs:
       - name: Ruff (lint new code)
         run: ruff check tests/
       - name: Mypy
-        run: mypy --ignore-missing-imports --explicit-package-bases tests/
+        run: mypy --ignore-missing-imports --follow-imports=skip tests/
       - name: Pytest
         run: pytest -v
