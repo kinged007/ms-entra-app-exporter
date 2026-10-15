@@ -11,7 +11,7 @@ Microsoft Entra ID exporter for tenant-to-tenant migration. Connects to Microsof
 - Commit identity: `kinged007 <599286+kinged007@users.noreply.github.com>`.
 - `.mailmap` is committed — do not reintroduce `you@example.com` authors.
 - Never commit `tenants/`, `files/`, `queries/`, `*.pem`, `*.crt`, or `.env`; they are gitignored.
-- Do not publish anything derived from the private `tenantflex` org without written org-owner approval (see workspace `docs/03-tenantflex.md`).
+- Do not commit secrets (API keys, tokens, .env). Only `.env.example` belongs in the repo.
 
 ## Checks
 
