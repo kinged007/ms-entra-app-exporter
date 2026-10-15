@@ -1,51 +1,83 @@
 # Microsoft Entra ID Migration Helper
 
-This application is designed to securely and compliantly export applications and service principals from Microsoft Entra ID tenants. It operates by establishing a tenant connection using an OAuth app for authentication. The required permissions are `Applications.Read.All` for either the application itself (Application access) or the user using the application (Delegated access).
+[![CI](https://github.com/kinged007/ms-entra-app-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/kinged007/ms-entra-app-exporter/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](requirements.txt)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+Export and sanitize Microsoft Entra ID app registrations and service principals for tenant-to-tenant migration. Built as consulting evidence for a tenant-migration engagement: connects via OAuth (MSAL), queries Microsoft Graph with `$search` / `$filter`, and writes redacted JSON ready for re-import.
+
+Permissions required: `Application.Read.All` (application or delegated).
 
 ## Features
 
-- **Tenant Connection**: Authenticate and connect using OAuth.
-- **Export Options**: Export app data using search and filter or from a CSV file.
-- **Data Sanitization**: Ensures sensitive information is not leaked.
+- **Tenant connections** — app or delegated (user) auth, certificate or client secret, stored as JSON in `tenants/`.
+- **Export** — search/filter against Graph or select from CSV; optionally fetches associated service principals in batches.
+- **Explorer** — interactive browser for any Graph endpoint with saved queries (`queries/`).
+- **Sanitization** — redacts `appId` occurrences and validates output against Pydantic schemas for applications and service principals.
+- **Proxy support** — reads `PROXY_ADDRESS` from `.env` or `--proxy` flag.
 
-## Setup
+## Install
 
-Create an App Registration (oAuth) app in Microsoft Entra. 
+```bash
+git clone https://github.com/kinged007/ms-entra-app-exporter.git
+cd ms-entra-app-exporter
 
-Under Authentication, click "Add a Platform".
-Select "Mobile and desktop Applications"
-Select the option for "MSAL only".
-Click "Configure"
+# option A: helper script (creates venv and installs)
+sh run.sh          # Windows: run.bat
 
-This will allow access via User Authentication.
+# option B: manual
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+```
 
-To allow access via Certificate or Secret Key, you can configure this in the "Certificates and Secrets" section.
+Requires Python 3.10+ and an app registration in Microsoft Entra.
 
+1. Create an App Registration in Microsoft Entra.
+2. Under **Authentication** → **Add a platform** → **Mobile and desktop applications** → enable **MSAL only** → **Configure** (for delegated/user auth). For app-only auth, add a certificate or secret under **Certificates & secrets**.
+3. Grant **Application.Read.All** (application or delegated, matching your connection type) and grant admin consent.
+
+Proxy (optional): create `.env` with `PROXY_ADDRESS="http://proxy:port"`.
 
 ## Usage
 
-To run the application, execute the following command:
-
 ```bash
+# via helper script (handles venv)
 sh run.sh
+
+# or directly
+python app.py
+python app.py --proxy http://proxy:port
 ```
 
-or on Windows:
+Menu: **Manage Tenants** (create/edit/delete), **API Explorer** (browse Graph endpoints), **Export App Metadata** (search/filter → sanitize → review → save to `files/`), **Clean up**.
+
+Saved tenants: `tenants/<name>.json`. Exports: `files/<clientId>_<type>_<timestamp>.json`. Never commit `tenants/`, `files/`, or `.env` — they are gitignored.
+
+## How it is tested
 
 ```bash
-run.bat
+pip install -r requirements.txt
+pytest -v
+ruff check tests/
+mypy --ignore-missing-imports tests/
 ```
 
-## Proxy Configuration
+CI runs the same checks on every push and pull request to `master`.
 
-If a proxy is required, specify it in the `.env` file.
+## Project layout
 
 ```
-PROXY_ADDRESS="http://your-proxy-address:port"
+app.py              # CLI entry + main menu
+src/tenant.py       # tenant CRUD and token acquisition (MSAL)
+src/apps.py         # Graph search/filter and batch fetch
+src/explorer.py     # interactive Graph explorer
+schema/             # Pydantic models for tenant, application, service principal
+utils/              # Graph requests, sanitization/redaction, dict helpers
+files/ tenants/ queries/  # gitignored runtime data
 ```
 
-## Installation
+## Security notes
 
-1. Clone the repository.
-2. Configure the `.env` file with your proxy settings if needed.
-3. Run the application using the provided scripts.
+- Tokens are held in memory only (`access_token` is never written to `tenants/*.json`).
+- Exports redact `appId` values to `__APPID_REDACTED__` via `utils/validate.py`.
+- Do not commit `tenants/`, `files/`, `queries/`, or `.env`.
