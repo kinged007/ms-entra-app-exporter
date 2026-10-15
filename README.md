@@ -8,9 +8,6 @@ Export and sanitize Microsoft Entra ID app registrations and service principals 
 
 Permissions required: `Application.Read.All` (application or delegated).
 
-![Demo](./docs/screenshot.png)
-_Screenshot to be added — replace `docs/screenshot.png` with a terminal capture of the export flow._
-
 ## Features
 
 - **Tenant connections** — app or delegated (user) auth, certificate or client secret, stored as JSON in `tenants/`.
